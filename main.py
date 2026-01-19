@@ -1,7 +1,7 @@
 import pygame
 
 from config import Constants
-from system.SwarmSystem import SwarmSystem
+from core.SwarmSystem import SwarmSystem
 
 
 # --- APP START ---
