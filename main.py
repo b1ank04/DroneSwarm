@@ -4,7 +4,7 @@ from config import Constants
 from system.SwarmSystem import SwarmSystem
 
 
-# --- ЗАПУСК ПРИЛОЖЕНИЯ ---
+# --- APP START ---
 def main():
     pygame.init()
     screen = pygame.display.set_mode((Constants.WIDTH, Constants.HEIGHT))
@@ -19,10 +19,9 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-            # Обработка нажатий клавиатуры
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_v:  # Нажата клавиша 'V'
-                    swarm.toggle_vision()
+            # Keyboard input
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_v:
+                swarm.toggle_vision()
 
         # Tracking mouse position as target
         target_pos = pygame.mouse.get_pos()

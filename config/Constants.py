@@ -1,20 +1,20 @@
-# --- КОНФИГУРАЦИЯ (Настройки системы) ---
-WIDTH, HEIGHT = 1200, 800  # Размеры окна
-BG_COLOR = (20, 20, 30)  # Темный фон
-DRONE_COLOR = (0, 255, 200)  # Цвет дронов
-TARGET_COLOR = (255, 50, 50)  # Цвет цели
+# Configuration settings
+WIDTH, HEIGHT = 1200, 800
+BG_COLOR = (20, 20, 30)
+DRONE_COLOR = (0, 255, 200)
+TARGET_COLOR = (255, 50, 50)
 FPS = 120
 
-# Параметры роя
-NUM_DRONES = 50  # Количество дронов
-MAX_SPEED = 4  # Максимальная скорость
-MAX_FORCE = 0.1  # Максимальная маневренность (резкость поворота)
-NEIGHBOR_RADIUS = 40  # Радиус, в котором дрон "видит" соседей
+# Swarm parameters
+NUM_DRONES = 50
+MAX_SPEED = 4
+MAX_FORCE = 0.1
+NEIGHBOR_RADIUS = 40
 SLOWING_RADIUS = 100
-STOP_RADIUS = 30
+PARKING_RADIUS = 100
 
-# Веса правил (Настройка поведения)
-W_SEPARATION = 1.6  # Избегание столкновений (самый высокий приоритет)
-W_ALIGNMENT = 1.0  # Согласование скорости
-W_COHESION = 0.8  # Стремление к центру группы
-W_TARGET = 1.2  # Стремление к цели
+# Behavior weights
+W_SEPARATION = 1.6
+W_ALIGNMENT = 1.0
+W_COHESION = 0.8
+W_TARGET = 1.2
