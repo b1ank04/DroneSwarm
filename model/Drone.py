@@ -5,22 +5,21 @@ from config import Constants
 
 
 class Drone:
-    """Класс-исполнитель. Хранит состояние одного дрона."""
+    """Agent class representing a single drone."""
 
     def __init__(self, x, y):
         self.position = Vector(x, y)
-        # Случайная начальная скорость
         self.velocity = Vector(random.uniform(-1, 1), random.uniform(-1, 1))
         self.acceleration = Vector(0, 0)
 
     def update(self):
-        """Обновление физики: Позиция += Скорость += Ускорение"""
+        """Update physics: Postion += Velocity += Acceleration"""
         self.velocity = self.velocity.add(self.acceleration)
         self.velocity = self.velocity.limit(Constants.MAX_SPEED)
         self.position = self.position.add(self.velocity)
-        self.acceleration = Vector(0, 0)  # Сброс ускорения на каждом кадре
+        self.acceleration = Vector(0, 0)
 
-        # Граничные условия (вылет за экран возвращает с другой стороны)
+        # Boundary wrap-around
         if self.position.x > Constants.WIDTH:
             self.position.x = 0
         elif self.position.x < 0:
@@ -31,5 +30,5 @@ class Drone:
             self.position.y = Constants.HEIGHT
 
     def apply_force(self, force):
-        """Получение команды (силы) от центральной системы"""
+        """Apply a force (acceleration) to the drone."""
         self.acceleration = self.acceleration.add(force)

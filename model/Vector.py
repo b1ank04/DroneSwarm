@@ -1,7 +1,7 @@
 import math
 
 class Vector:
-    """Вспомогательный класс для работы с векторами, чтобы не использовать numpy (для простоты)"""
+    """Helper class for vector math (to avoid numpy dependency)."""
 
     def __init__(self, x, y):
         self.x = x
@@ -20,16 +20,16 @@ class Vector:
         if scalar == 0: return Vector(0, 0)
         return Vector(self.x / scalar, self.y / scalar)
 
-    def mag(self):  # Длина вектора
+    def mag(self):
         return math.sqrt(self.x ** 2 + self.y ** 2)
 
-    def normalize(self):  # Приведение к единичной длине
+    def normalize(self):
         m = self.mag()
         if m > 0:
             return self.div(m)
         return Vector(0, 0)
 
-    def limit(self, max_val):  # Ограничение длины вектора
+    def limit(self, max_val):
         if self.mag() > max_val:
             return self.normalize().mul(max_val)
         return self
