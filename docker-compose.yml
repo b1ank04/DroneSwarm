@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  drone-swarm:
+    build: .
+    container_name: drone-swarm
+    # Keep the container running
+    stdin_open: true # docker run -i
+    tty: true        # docker run -t
+
+    environment:
+      # For macOS/Windows (using Docker Desktop)
+      - DISPLAY=${DISPLAY:-host.docker.internal:0}
+
+      # For Linux (uncomment below and comment above)
+      # - DISPLAY=${DISPLAY}
+
+    # Volumes for Linux X11 forwarding (uncomment for Linux)
+    # volumes:
+    #   - /tmp/.X11-unix:/tmp/.X11-unix
