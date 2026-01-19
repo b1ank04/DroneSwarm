@@ -25,6 +25,63 @@ python main.py
 - **Mouse Movement**: Control the target point (red circle) that the swarm follows.
 - **`V` Key**: Toggle the visualization of each drone's neighbor perception radius.
 
+### Running via Docker
+To run the simulation in a Docker container while displaying the window on your host machine, follow these steps.
+
+**1. Build the Docker Image**
+```bash
+docker build -t drone-swarm .
+```
+
+**2. Run the Container**
+
+*   **Linux**:
+    ```bash
+    xhost +local:docker
+    docker run -it --rm \
+      -v /tmp/.X11-unix:/tmp/.X11-unix \
+      -e DISPLAY=$DISPLAY \
+      drone-swarm
+    ```
+
+*   **macOS**:
+    1.  Install [XQuartz](https://www.xquartz.org/).
+    2.  Open XQuartz, go to **Preferences > Security** and check **"Allow connections from network clients"**.
+    3.  Restart XQuartz.
+    4.  Run the following in your terminal:
+        ```bash
+        xhost + 127.0.0.1
+        docker run -it --rm \
+          -e DISPLAY=host.docker.internal:0 \
+          drone-swarm
+        ```
+
+*   **Windows**:
+    1.  Install an X Server like [VcXsrv](https://sourceforge.net/projects/vcxsrv/).
+    2.  Launch XLaunch with **"Disable access control"** checked.
+    3.  Run in PowerShell/Command Prompt:
+        ```bash
+        docker run -it --rm -e DISPLAY=host.docker.internal:0 drone-swarm
+        ```
+
+### Running via Docker Compose
+Alternatively, you can use Docker Compose.
+
+**MACOS USERS:**
+Use the provided helper script which automatically configures permissions:
+```bash
+./run_mac.sh
+```
+*Make sure you have enabled "Allow connections from network clients" in XQuartz Preferences > Security.*
+
+**Other OS:**
+1.  **Start the Simulation**:
+    ```bash
+    docker-compose up --build
+    ```
+
+    *Note: Ensure your X server (XQuartz/VcXsrv/Xorg) is configured as described in the "Run the Container" section above.*
+
 ---
 
 ## How It Works
