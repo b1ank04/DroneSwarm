@@ -18,43 +18,55 @@ class SwarmSystem:
         self.show_vision_radius = not self.show_vision_radius
 
     def update(self, target_pos):
-        """Главный цикл расчета логики роя"""
         target_vec = Vector(target_pos[0], target_pos[1])
 
+        # Радиус, внутри которого дрон переходит в режим "парковки"
+        # Он должен быть достаточно большим, чтобы вместить всех дронов
+        PARKING_RADIUS = 100
+
         for drone in self.drones:
-            # 1. Считаем дистанцию до цели
+            # Считаем дистанцию до цели
             dist_to_target = math.sqrt((drone.position.x - target_vec.x) ** 2 +
                                        (drone.position.y - target_vec.y) ** 2)
 
-            # --- ЖЕСТКАЯ ОСТАНОВКА ---
-            if dist_to_target < Constants.STOP_RADIUS:
-                # Мгновенно обнуляем скорость
-                drone.velocity = Vector(0, 0)
-                # Обнуляем ускорение, чтобы старые силы не действовали
-                drone.acceleration = Vector(0, 0)
-                # continue пропускает весь код ниже для этого дрона
-                # (он не будет считать соседей и двигаться в этом кадре)
-                continue
-                # -------------------------
-            # 1. Получаем список соседей для конкретного дрона
+            # Получаем соседей (нужны всегда для избегания столкновений)
             neighbors = self._get_neighbors(drone)
 
-            # 2. Вычисляем управляющие векторы (правила Boids)
-            separation = self._separation(drone, neighbors)
-            alignment = self._alignment(drone, neighbors)
-            cohesion = self._cohesion(drone, neighbors)
-            seek_target = self._seek(drone, target_vec)
+            # --- ЛОГИКА ПАРКОВКИ (Внутри радиуса) ---
+            if dist_to_target < PARKING_RADIUS:
+                # 1. Считаем ТОЛЬКО силу разделения (чтобы не наезжать друг на друга)
+                separation = self._separation(drone, neighbors)
 
-            # 3. Применяем весовые коэффициенты
-            separation = separation.mul(Constants.W_SEPARATION)
-            alignment = alignment.mul(Constants.W_ALIGNMENT)
-            cohesion = cohesion.mul(Constants.W_COHESION)
-            seek_target = seek_target.mul(Constants.W_TARGET)
+                # Усиливаем разделение, чтобы они активнее освобождали место
+                separation = separation.mul(Constants.W_SEPARATION * 2.0)
 
-            # 4. Суммируем силы и отправляем команду дрону
-            total_force = separation.add(alignment).add(cohesion).add(seek_target)
-            drone.apply_force(total_force)
-            drone.update()
+                # 2. Применяем силу
+                drone.apply_force(separation)
+
+                # 3. Обновляем физику
+                drone.update()
+
+                # 4. СИЛЬНОЕ ТОРМОЖЕНИЕ (Трение)
+                # Вместо обычного движения, мы гасим скорость очень сильно (0.8)
+                # Это не дает им разлететься, когда их толкает сила Separation
+                drone.velocity = drone.velocity.mul(0.85)
+
+            # --- ЛОГИКА ПОЛЕТА (Снаружи радиуса) ---
+            else:
+                separation = self._separation(drone, neighbors)
+                alignment = self._alignment(drone, neighbors)
+                cohesion = self._cohesion(drone, neighbors)
+                seek_target = self._seek(drone, target_vec)
+
+                separation = separation.mul(Constants.W_SEPARATION)
+                alignment = alignment.mul(Constants.W_ALIGNMENT)
+                cohesion = cohesion.mul(Constants.W_COHESION)
+                seek_target = seek_target.mul(Constants.W_TARGET)
+
+                total_force = separation.add(alignment).add(cohesion).add(seek_target)
+
+                drone.apply_force(total_force)
+                drone.update()
 
     def _get_neighbors(self, drone):
         """Находит всех дронов в радиусе видимости"""
