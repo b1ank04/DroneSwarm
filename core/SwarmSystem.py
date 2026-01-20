@@ -26,29 +26,48 @@ class SwarmSystem:
 
             neighbors = self._get_neighbors(drone)
 
+            # --- 1. РЕЖИМ ПАРКОВКИ (Parking State) ---
             if dist_to_target < Constants.PARKING_RADIUS:
-                # Parking logic: Strong separation to avoid stacking
+                # Усиленное разделение, чтобы не "склеиваться" в точке финиша
                 separation = self._separation(drone, neighbors)
                 separation = separation.mul(Constants.W_SEPARATION * 2.0)
 
                 drone.apply_force(separation)
                 drone.update()
 
-                # Strong braking (Friction) to stop motion
+                # Сильное трение (тормоза) для остановки
                 drone.velocity = drone.velocity.mul(0.85)
 
+            # --- 2. РЕЖИМ ПОЛЕТА (Flight State) с Адаптивным Интеллектом ---
             else:
-                # Flight logic
-                separation = self._separation(drone, neighbors)
-                alignment = self._alignment(drone, neighbors)
-                cohesion = self._cohesion(drone, neighbors)
-                seek_target = self._seek(drone, target_vec)
+                # A. Анализ контекста (Context Awareness)
+                neighbor_count = len(neighbors)
 
-                separation = separation.mul(Constants.W_SEPARATION)
-                alignment = alignment.mul(Constants.W_ALIGNMENT)
-                cohesion = cohesion.mul(Constants.W_COHESION)
-                seek_target = seek_target.mul(Constants.W_TARGET)
+                # Берем базовые веса из констант как отправную точку
+                curr_w_sep = Constants.W_SEPARATION
+                curr_w_align = Constants.W_ALIGNMENT
+                curr_w_coh = Constants.W_COHESION
+                curr_w_target = Constants.W_TARGET
 
+                # B. Адаптация весов (Fuzzy Rules)
+                # Сценарий 1: Плотная толпа / Опасность столкновения
+                if neighbor_count > 3:
+                    curr_w_sep *= 2.5  # Приоритет: избегать столкновений
+                    curr_w_align *= 1.5  # Приоритет: двигаться синхронно с потоком
+                    curr_w_target *= 0.5  # Уменьшаем желание рваться к цели любой ценой
+
+                # Сценарий 2: Одиночный полет
+                elif neighbor_count == 0:
+                    curr_w_coh = 0.0  # Отключаем сплоченность (не с кем кучковаться)
+                    curr_w_target *= 1.2  # Можно лететь к цели быстрее
+
+                # C. Расчет сил с учетом адаптивных весов
+                separation = self._separation(drone, neighbors).mul(curr_w_sep)
+                alignment = self._alignment(drone, neighbors).mul(curr_w_align)
+                cohesion = self._cohesion(drone, neighbors).mul(curr_w_coh)
+                seek_target = self._seek(drone, target_vec).mul(curr_w_target)
+
+                # D. Сумма сил
                 total_force = separation.add(alignment).add(cohesion).add(seek_target)
 
                 drone.apply_force(total_force)
